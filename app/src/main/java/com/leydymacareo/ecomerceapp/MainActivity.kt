@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth()
                 ){
                     composable ("login"){
-                        LoginSreen()
+                        LoginSreen(myNavController)
                     }
                     composable ("register") { RegisterScreen() }
                 }
