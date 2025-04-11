@@ -1,5 +1,6 @@
 package com.leydymacareo.ecomerceapp
 
+import HomeSreen
 import LoginSreen
 import RegisterScreen
 import android.os.Bundle
@@ -35,7 +36,10 @@ class MainActivity : ComponentActivity() {
                     composable ("login"){
                         LoginSreen(myNavController)
                     }
-                    composable ("register") { RegisterScreen() }
+                    composable ("register") { RegisterScreen(myNavController) }
+                    composable("home") {
+                        HomeSreen()
+                    }
                 }
             }
         }
