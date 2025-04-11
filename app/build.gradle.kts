@@ -60,4 +60,8 @@ dependencies {
     val nav_version = "2.8.9"
     //Esta es la libreria de navegacion
     implementation(libs.androidx.navigation.compose)
+
+    //Esta es la libreria para cagar imagenes de intertrnet
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }
