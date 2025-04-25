@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "808601905507",
+    "project_id": "ecomerceapp-d0c0d",
+    "storage_bucket": "ecomerceapp-d0c0d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808601905507:android:96ff474c803c07d70e8b56",
+        "android_client_info": {
+          "package_name": "com.leydymacareo.ecomerceapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDX_Dzc2GsgLdtVB9Hda7rGRROfLfgLvl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
