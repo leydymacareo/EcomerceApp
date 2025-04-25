@@ -2,6 +2,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,12 +33,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.leydymacareo.ecomerceapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun HomeSreen(){
+fun HomeSreen(onClickLogout: () -> Unit = {}){
+
+    val auth = Firebase.auth
+    val user = auth.currentUser
+
     Scaffold (
         topBar = {
             val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -49,11 +56,15 @@ fun HomeSreen(){
                 ),
                 title = {
                     Text(
-                        "Bienvenido",
+                        text = if (user != null)
+                            "Bienvenido, ${user.email}"
+                        else
+                            "No hay usuario",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                },
+                }
+                ,
                 navigationIcon = {
                     IconButton(onClick = { /* do something */ }) {
                         Icon(
@@ -63,7 +74,10 @@ fun HomeSreen(){
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = {
+                        auth.signOut()
+                        onClickLogout()
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Localized description"

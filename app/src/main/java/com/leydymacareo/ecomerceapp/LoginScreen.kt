@@ -1,3 +1,6 @@
+import android.app.Activity
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -5,9 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -19,23 +26,49 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.auth
 import com.leydymacareo.ecomerceapp.R
+import com.leydymacareo.ecomerceapp.validateEmail
+import com.leydymacareo.ecomerceapp.validatePassword
 
 @Composable
-fun LoginSreen(navController: NavController){
+fun LoginSreen(onClickRegister : ()->Unit = {}, onSuccessfulLogin :() ->Unit = {}){
+
+    val auth = Firebase.auth
+    val activity = LocalView.current.context as Activity
+
+    // Estados de los input
+    var inputEmail by remember { mutableStateOf("") }
+    var inputPassword by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+
     Scaffold { innerPadding ->
         Column (
             modifier = Modifier.padding(innerPadding)
                 .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 30.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -55,8 +88,11 @@ fun LoginSreen(navController: NavController){
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = inputEmail,
+                onValueChange = { inputEmail = it },
+                label = {
+                    Text(text = "Correo Electronico")
+                },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Email,
@@ -64,10 +100,19 @@ fun LoginSreen(navController: NavController){
                         tint = Color(0xFFFF9900)
                     )
                 },
-
-                label = {
-                    Text(text = "Correo Electronico")
+                supportingText = {
+                    if (emailError.isNotEmpty()){
+                        Text(
+                            text= emailError,
+                            color = Color.Red
+                        )
+                    }
                 },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrect = false,
+                    keyboardType = KeyboardType.Email
+                ),
                 shape = RoundedCornerShape(12.dp)
             )
 
@@ -75,8 +120,11 @@ fun LoginSreen(navController: NavController){
 
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = inputPassword,
+                onValueChange = {inputPassword = it},
+                label = {
+                    Text(text = "Contraseña")
+                },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Lock,
@@ -84,16 +132,65 @@ fun LoginSreen(navController: NavController){
                         tint = Color(0xFFFF9900)
                     )
                 },
-
-                label = {
-                    Text(text = "Contraseña")
+                supportingText = {
+                    if (passwordError.isNotEmpty()){
+                        Text(
+                            text = passwordError,
+                            color = Color.Red
+                        )
+                    }
                 },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrect = false,
+                    keyboardType = KeyboardType.Password
+                ),
+
                 shape = RoundedCornerShape(12.dp)
             )
             Spacer(modifier = Modifier.height(24.dp))
 
+            if (loginError.isNotEmpty()){
+
+            }
+
+            Text(
+                loginError,
+                color = Color.Red,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
             Button(onClick = {
-                navController.navigate("home")
+
+                val isValidEmail: Boolean = validateEmail(inputEmail).first
+                val isValidPassword = validatePassword(inputPassword).first
+
+                emailError = validateEmail(inputEmail).second
+                passwordError = validatePassword(inputPassword).second
+
+                if (isValidEmail && isValidPassword) {
+
+                    auth.signInWithEmailAndPassword( inputEmail, inputPassword)
+                        .addOnCompleteListener(activity){task ->
+
+                            if (task.isSuccessful) {
+                                onSuccessfulLogin()
+                            } else {
+                                loginError = when(task.exception) {
+                                    is FirebaseAuthInvalidUserException -> "Correo o contraseña incorrecta"
+                                    is FirebaseAuthInvalidUserException -> "No existe una cuenta con este correo"
+                                    else -> "Error al iniciar sesion. Intenta de nuevo"
+                                }
+                            }
+                        }
+                } else {
+                    loginError
+                }
+
+
+
             },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,10 +204,7 @@ fun LoginSreen(navController: NavController){
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            TextButton(onClick = {
-
-                navController.navigate("register")
-            }) {
+            TextButton(onClick = onClickRegister) {
                 Text(text = "¿No tienes una cuenta? Registrate",
                     color = Color(0xFFFF9900))
             }
@@ -120,8 +214,4 @@ fun LoginSreen(navController: NavController){
     }
 }
 
-@Preview
-@Composable
-fun LoginSreenPreview() {
-    //LoginSreen()
-}
+

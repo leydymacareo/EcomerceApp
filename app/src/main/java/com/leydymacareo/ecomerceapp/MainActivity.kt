@@ -2,6 +2,7 @@ package com.leydymacareo.ecomerceapp
 
 import HomeSreen
 import LoginSreen
+import NavigationApp
 import RegisterScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,21 +27,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EcomerceAppTheme {
-                val myNavController = rememberNavController()
-                val myStarDestination: String = "login"
-                NavHost(
-                    navController = myNavController,
-                    startDestination = myStarDestination,
-                    modifier = Modifier.fillMaxWidth()
-                ){
-                    composable ("login"){
-                        LoginSreen(myNavController)
-                    }
-                    composable ("register") { RegisterScreen(myNavController) }
-                    composable("home") {
-                        HomeSreen()
-                    }
-                }
+                NavigationApp()
+
             }
         }
     }
